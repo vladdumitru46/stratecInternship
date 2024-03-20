@@ -2,17 +2,18 @@ package org.example;
 
 import org.example.models.Shop;
 import org.example.repository.ShopRepository;
+import org.example.service.Service;
 
 import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) {
-        ShopRepository shopRepository = new ShopRepository("C:\\Users\\vladb\\Desktop\\internshipRobot\\stratecInternchip\\src\\main\\resources\\files\\Input_One.txt");
+        ShopRepository shopRepository = new ShopRepository();
+        Service service = new Service(shopRepository);
         try {
-            Shop shop = shopRepository.readFromFile();
-            System.out.println(shop);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            service.processingSchedule("C:\\Users\\vladb\\Desktop\\internshipRobot\\stratecInternchip\\src\\main\\resources\\files\\Input_One.txt");
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
     }
 }

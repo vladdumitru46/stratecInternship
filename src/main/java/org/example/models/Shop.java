@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.Map;
 
 @Getter
@@ -14,17 +15,22 @@ import java.util.Map;
 @NoArgsConstructor
 public class Shop {
     private Map<String, String> availableMachines;
-    private Map<String, String> machineFeatures;
-    private String partList;
-    private Map<String, String> partOperations;
+    private Map<String, List<String>> machineFeatures;
+    private Map<String, String> partList;
+    private Map<String, List<String>> partOperations;
 
     @Override
     public String toString() {
-        return "Shop{" +
-                "availableMachines='" + availableMachines + '\'' +
-                ", machineFeatures='" + machineFeatures + '\'' +
-                ", partList='" + partList + '\'' +
-                ", partOperations='" + partOperations + '\'' +
-                '}';
+        final String[] output = {"machine features: \n"};
+        machineFeatures.forEach((machineName, feature) -> {
+            output[0] += machineName + ": ";
+            feature.forEach(f -> output[0] += f + "\n");
+        });
+        output[0] += "Part Operations: \n";
+        partOperations.forEach((partName, operations) -> {
+            output[0] += partName + ": ";
+            operations.forEach(f -> output[0] += f + "\n");
+        });
+        return output[0];
     }
 }

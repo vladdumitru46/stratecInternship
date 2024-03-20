@@ -1,6 +1,8 @@
 package org.example.repository;
 
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.example.models.Shop;
 import org.springframework.stereotype.Repository;
 
@@ -11,11 +13,14 @@ import java.util.*;
 
 @Repository
 @AllArgsConstructor
+@Setter
+@NoArgsConstructor
 public class ShopRepository {
 
     private String fileName;
 
-    public Shop readFromFile() throws IOException {
+
+    public Shop readFromFile() throws Exception {
         try {
             Shop shop = new Shop();
             FileReader fileReader = new FileReader(fileName);
@@ -24,8 +29,9 @@ public class ShopRepository {
             String inputLine = "";
             Map<String, String> mapOfAvailableMachines = new HashMap<>();
             Map<String, List<String>> mapOfMachineFeatures = new HashMap<>();
-            List<String> propertiesOfMachines = new ArrayList<>();
-            Map<String, String> mapOfPartOperations = new HashMap<>();
+            Map<String, String> mapOfPartList = new HashMap<>();
+            Map<String, List<String>> mapOfPartOperations = new HashMap<>();
+            String curentId = "";
             while ((line = bufferedReader.readLine()) != null) {
                 if (!line.contains("#")) {
                     if (line.contains("Available machines:") || line.contains("Machine features:")
@@ -41,26 +47,46 @@ public class ShopRepository {
                             }
                         }
                         case "Machine features:" -> {
-                            String[] lineSplit = line.split(":");
+                            curentId = getProperties(line, mapOfAvailableMachines, mapOfMachineFeatures, curentId);
+                        }
+                        case "Part list:" -> {
+                            String[] lineSplit = line.split("\\.");
                             if (lineSplit.length > 1) {
-                                propertiesOfMachines.add(lineSplit[1] + lineSplit[2]);
-                                mapOfMachineFeatures.put(mapOfAvailableMachines.get(lineSplit[0]), propertiesOfMachines);
+                                mapOfPartList.put(lineSplit[0], lineSplit[1]);
                             }
                         }
-//                        case "Part list:" -> shop.setPartList(shop.getPartList() + "\n" + line);
-//                        case "Part operations:" -> shop.setPartOperations(shop.getPartOperations() + "\n" + line);
+
+                        case "Part operations:" -> {
+                            curentId = getProperties(line, mapOfPartList, mapOfPartOperations, curentId);
+                        }
+
                     }
                 }
             }
-
-            mapOfMachineFeatures.forEach((e, i) -> {
-                System.out.println(e + " " + i);
-            });
+            shop.setPartList(mapOfPartList);
+            shop.setMachineFeatures(mapOfMachineFeatures);
+            shop.setAvailableMachines(mapOfAvailableMachines);
+            shop.setPartOperations(mapOfPartOperations);
             bufferedReader.close();
             return shop;
-        } catch (IOException e) {
-            throw new IOException(e.getMessage());
+        } catch (Exception e) {
+            throw new Exception("File does not exist");
         }
+    }
+
+    private String getProperties(String line, Map<String, String> mapOfAvailableMachines, Map<String, List<String>> mapOfMachineFeatures, String curentId) {
+        String[] lineSplit = line.split(":");
+        if (lineSplit.length == 3) {
+            List<String> propertiesOfMachines = new ArrayList<>();
+            curentId = lineSplit[0];
+            propertiesOfMachines.add(lineSplit[1] + ":" + lineSplit[2]);
+            mapOfMachineFeatures.put(mapOfAvailableMachines.get(curentId), propertiesOfMachines);
+        } else if (lineSplit.length == 2) {
+            List<String> propertiesOfMachines = mapOfMachineFeatures.get(mapOfAvailableMachines.get(curentId));
+            propertiesOfMachines.add(line);
+            mapOfMachineFeatures.put(mapOfAvailableMachines.get(curentId), propertiesOfMachines);
+        }
+        return curentId;
     }
 
 }
