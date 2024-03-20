@@ -30,8 +30,8 @@ public class Service {
             List<String> operations = shop.getPartOperations().get(partName);
             for (String operation : operations) {
                 String[] operationDetails = operation.split(":");
-                String machineName = operationDetails[1].trim();
-                int operationTime = Integer.parseInt(operationDetails[2].trim());
+                String machineName = operationDetails[0].trim().substring(1);
+                int operationTime = Integer.parseInt(operationDetails[1].split(" ")[1].trim());
                 int start = Math.max(currentTime, machineCooldown.get(machineName));
                 int end = start + operationTime;
                 System.out.println("Operation on " + machineName + " starts at " + formatTime(start) + " and ends at " + formatTime(end));
